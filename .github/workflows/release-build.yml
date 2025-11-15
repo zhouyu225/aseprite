@@ -53,15 +53,22 @@ jobs:
         shell: bash
         working-directory: aseprite
         run: |
-          cmake -S . -B build -G Ninja `
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-            -DENABLE_TESTS=OFF `
-            -DENABLE_SCRIPTING=ON `
-            -DENABLE_CCACHE=OFF `
-            -DLAF_BACKEND=skia `
-            -DSKIA_DIR=$(realpath skia) `
-            -DOPENSSL_USE_STATIC_LIBS=ON `
-            -DSKIA_LIBRARY_DIR=$(realpath skia/out/Release-x64)
+          
+          export enable_ccache=off
+          export laf_backend=skia
+          export enable_scripting=on
+          export skia_arch=x64
+
+          
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DENABLE_TESTS=OFF \
+            -DENABLE_SCRIPTING=$enable_scripting \
+            -DENABLE_CCACHE=$enable_ccache \
+            -DLAF_BACKEND=$laf_backend \
+            -DSKIA_DIR=$(pwd)/skia \
+            -DOPENSSL_USE_STATIC_LIBS=ON \
+            -DSKIA_LIBRARY_DIR=$(pwd)/skia/out/Release-$skia_arch
             
       - name: Compiling
         shell: bash
@@ -73,17 +80,18 @@ jobs:
         working-directory: aseprite/build/bin
         shell: bash
         run: |
-          Get-ChildItem | Where-Object { 
-            $_.Name -notin @('aseprite.exe', 'data') -and $_.Name -notlike '*.dll'
-          } | Remove-Item -Recurse -Force
+          
+          find . -mindepth 1 ! \( -name 'aseprite.exe' -o -name 'data' -prune \) -exec rm -rf {} +
           
       - name: Make portable zip
         working-directory: aseprite/build/bin
+        shell: bash
         run: |
           echo '# This file is here so Aseprite behaves as a portable program' > aseprite.ini
           
       - name: Create Release zip
         working-directory: aseprite/build/bin
+        shell: bash
         run: |
           7z -tzip a Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-Windows.zip *
           
@@ -95,7 +103,7 @@ jobs:
           body: |
             Aseprite ${{ needs.fetch-aseprite-info.outputs.release-tag }} - Windows Build
             Auto-built release version.
-            Build Date: ${{ github.event.schedule }}
+            Build Date: ${{ github.event.head_commit.timestamp }}
           artifacts: aseprite/build/bin/Aseprite-${{ needs.fetch-aseprite-info.outputs.release-tag }}-Windows.zip
           skipIfReleaseExists: true
           token: ${{ secrets.GITHUB_TOKEN }}

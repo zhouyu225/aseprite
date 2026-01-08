@@ -17,6 +17,7 @@ accroding to [Eula](https://github.com/aseprite/aseprite/blob/main/EULA.txt) :
 
 we need to remove the product in `Releases` .
 
+
 # FAQ
 
 ## Windows: libcrypto-1_1-x64.dll not found
@@ -25,3 +26,4 @@ we need to remove the product in `Releases` .
 3. now the aseprite should working properly
 
 This is a new word: asscd
+

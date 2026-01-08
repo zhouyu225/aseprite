@@ -24,3 +24,4 @@ we need to remove the product in `Releases` .
 2. extract `x64/bin/libcrypto-1_1-x64.dll` from `openssl-1.1.1w.zip` to the same directory as `aseprite.exe`
 3. now the aseprite should working properly
 
+This is a new word: asscd
